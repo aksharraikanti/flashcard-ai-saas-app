@@ -48,7 +48,7 @@ export async function POST(req) {
             "top_p": 1,
             "stream": true,
             "stop": null,
-            "response_format": { type: "json" } // Corrected to be an object
+            "response_format": { type: "json" }
         });
 
         let fullResponse = '';

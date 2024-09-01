@@ -38,15 +38,31 @@ export default function Home() {
   // Handler for generating flashcards
   const generateFlashcards = async () => {
     try {
-      const response = await axios.post('/api/generate', {
-        messages: [{ role: 'user', content: prompt }],
+      const response = await fetch('/Users/aksharraikanti/code/headstarter/flashcard-ai-saas/app/api/generate/route.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }),
       });
-      setFlashcards(response.data.flashcards);
+  
+      if (!response.ok) throw new Error('Network response was not ok');
+  
+      const data = await response.json();
+      setFlashcards(data.flashcards);
       setShowFlashcards(true);
     } catch (error) {
-      console.error('Error generating flashcards:', error.response.data);
+      console.error('Error generating flashcards:', error);
       alert('Failed to generate flashcards. Please try again.');
     }
+    // try {
+    //   const response = await axios.post('/api/generate/route.js', {
+    //     messages: [{ role: 'user', content: prompt }],
+    //   });
+    //   setFlashcards(response.data.flashcards);
+    //   setShowFlashcards(true);
+    // } catch (error) {
+    //   console.error('Error generating flashcards:', error.response.data);
+    //   alert('Failed to generate flashcards. Please try again.');
+    // }
   };  
 
   return (
