@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Container,
   TextField,
@@ -15,8 +16,39 @@ import {
 } from '@mui/material';
 import { SignedOut, UserButton, SignedIn } from '@clerk/nextjs';
 import Head from 'next/head';
+import axios from 'axios'; // Import axios for API requests
 
 export default function Home() {
+  const router = useRouter();
+  const [showInput, setShowInput] = useState(false);
+  const [prompt, setPrompt] = useState('');
+  const [flashcards, setFlashcards] = useState([]);
+  const [showFlashcards, setShowFlashcards] = useState(false);
+
+  // Handler for the "Get Started" button click
+  const handleGetStarted = () => {
+    setShowInput(true);
+  };
+
+  // Handler for the text input change
+  const handleInputChange = (e) => {
+    setPrompt(e.target.value);
+  };
+
+  // Handler for generating flashcards
+  const generateFlashcards = async () => {
+    try {
+      const response = await axios.post('/api/generate', {
+        messages: [{ role: 'user', content: prompt }],
+      });
+      setFlashcards(response.data.flashcards);
+      setShowFlashcards(true);
+    } catch (error) {
+      console.error('Error generating flashcards:', error.response.data);
+      alert('Failed to generate flashcards. Please try again.');
+    }
+  };  
+
   return (
     <Container maxWidth="100vw">
       <Head>
@@ -53,110 +85,58 @@ export default function Home() {
           textAlign: 'center',
         }}
       >
-        <Typography variant="h2">Welcome to Flashcard SaaS</Typography>
-        <Typography variant="h5">
-          The easiest way to create flashcards from your text
-        </Typography>
-        <Button variant="contained" color="primary" sx={{ mt: 2 }}>
-          Get Started
-        </Button>
-      </Box>
+        {!showInput && (
+          <>
+            <Typography variant="h2">Welcome to Flashcard SaaS</Typography>
+            <Typography variant="h5">
+              The easiest way to create flashcards from your text
+            </Typography>
+            <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleGetStarted}>
+              Get Started
+            </Button>
+          </>
+        )}
 
-      {/* Features Section */}
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Features
-        </Typography>
-        <Grid container spacing={4} alignItems="center" justifyContent="center">
-          {['Easy to use!', 'Practice with Flashcards!', 'Best to use to study!', 'Customizable Decks!', 'Progress Tracking!', 'Collaborate with Others!'].map((feature) => (
-            <Grid item xs={12} sm={6} md={4} key={feature}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h6" align="center">
-                    {feature}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
+        {showInput && !showFlashcards && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5">Enter a prompt for your flashcards:</Typography>
+            <TextField
+              variant="outlined"
+              fullWidth
+              placeholder="Enter your prompt"
+              value={prompt}
+              onChange={handleInputChange}
+              sx={{ mt: 2 }}
+            />
+            <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={generateFlashcards}>
+              Generate Flashcards
+            </Button>
+          </Box>
+        )}
 
-      {/* Pricing Section */}
-      {/* Pricing Section */}
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Pricing
-        </Typography>
-        <Grid container spacing={4} alignItems="center" justifyContent="center">
-          {['Free Plan', 'Pro Plan', 'Enterprise Plan'].map((plan, index) => (
-            <Grid item xs={12} sm={6} md={4} key={plan}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <CardContent>
-                  <Typography variant="h6" align="center" gutterBottom>
-                    {plan}
-                  </Typography>
-                  <Typography variant="body1" align="center">
-                    {index === 0
-                      ? 'Get started with our basic features for free.'
-                      : index === 1
-                      ? 'Unlock all features for individual use.'
-                      : 'Customized solutions for teams and enterprises.'}
-                  </Typography>
-                </CardContent>
-                <Box sx={{ textAlign: 'center', mb: 2 }}>
-                  <Button
-                    variant="contained"
-                    // color={selectedPlan === plan ? 'primary' : 'secondary'}
-                    onClick={() => handleSelectPlan(plan)}
-                  >
-                    {/* {selectedPlan === plan ? 'Selected' : 'Choose Plan'} */}
-                  </Button>
-                </Box>
-              </Card>
+        {showFlashcards && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom>
+              Your Flashcards
+            </Typography>
+            <Grid container spacing={4} alignItems="center" justifyContent="center">
+              {flashcards.map((flashcard, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card sx={{ height: '100%' }}>
+                    <CardContent>
+                      <Typography variant="h6" align="center">
+                        {flashcard.front}
+                      </Typography>
+                      <Typography variant="body1" align="center" sx={{ mt: 2 }}>
+                        {flashcard.back}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
-      </Box>
-
-      {/* Benefits Section */}
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Benefits
-        </Typography>
-        <Grid container spacing={4} alignItems="center" justifyContent="center">
-          {['Improve Retention', 'Save Time', 'Learn Anywhere', 'Enhance Collaboration'].map((benefit) => (
-            <Grid item xs={12} sm={6} md={4} key={benefit}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h6" align="center">
-                    {benefit}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-
-      {/* How It Works Section */}
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          How It Works
-        </Typography>
-        <Grid container spacing={4} alignItems="center" justifyContent="center">
-          {['Create an Account', 'Add Your Content', 'Generate Flashcards', 'Start Learning'].map((step) => (
-            <Grid item xs={12} sm={6} md={3} key={step}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h6" align="center">
-                    {step}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+          </Box>
+        )}
       </Box>
     </Container>
   );

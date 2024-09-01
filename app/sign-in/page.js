@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import { Container, Typography, Box, Card, CardContent, Grid, TextField, Button } from '@mui/material';
 import {AppBar, Container, Typography, Box, Card, CardContent, Grid, TextField, Button} from '@mui/material';
 
 export default function SignUpPage(){
